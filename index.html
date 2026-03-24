@@ -171,63 +171,75 @@
             padding: 10px 0 50px;
         }
 
-        /* Карточка */
+        /* Карточка с 3D-эффектом */
         .reason-card {
-            background: rgba(255, 245, 250, 0.95);
-            backdrop-filter: blur(5px);
+            background: transparent;
             border-radius: 28px;
-            padding: 0;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            min-height: 140px;
-            border: 1px solid rgba(255, 111, 165, 0.5);
+            min-height: 160px;
+            perspective: 1000px;
         }
 
-        .reason-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 35px rgba(255, 111, 165, 0.3);
-            border-color: #ff6fa5;
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            transform-style: preserve-3d;
+            border-radius: 28px;
+        }
+
+        .reason-card.opened .card-inner {
+            transform: rotateY(180deg);
         }
 
         .card-front, .card-back {
+            position: relative;
             width: 100%;
-            padding: 28px 20px;
-            transition: all 0.3s ease;
+            min-height: 160px;
+            backface-visibility: hidden;
             border-radius: 28px;
+            padding: 28px 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
         .card-front {
             background: linear-gradient(135deg, #fff0f5, #ffe4ed);
+            transform: rotateY(0deg);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
-            text-align: center;
-            min-height: 140px;
+            border: 1px solid rgba(255, 111, 165, 0.5);
         }
 
         .card-back {
             background: linear-gradient(135deg, #ffd9e6, #ffc0d6);
-            display: none;
+            transform: rotateY(180deg);
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            min-height: 140px;
+            flex-direction: column;
             color: #a13e5c;
             font-weight: 500;
             font-size: 1rem;
             line-height: 1.5;
+            border: 1px solid rgba(255, 111, 165, 0.6);
         }
 
-        .reason-card.opened .card-front {
-            display: none;
+        .reason-card:hover .card-front {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 35px rgba(255, 111, 165, 0.3);
         }
 
-        .reason-card.opened .card-back {
-            display: flex;
+        .reason-card:hover .card-back {
+            box-shadow: 0 20px 35px rgba(255, 111, 165, 0.3);
         }
 
         .card-number {
@@ -257,6 +269,19 @@
             50% { transform: scale(1.1); opacity: 1; }
         }
 
+        /* Анимация для текста на обратной стороне */
+        .card-back-content {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition-delay: 0.2s;
+        }
+
+        .reason-card.opened .card-back-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         @media (max-width: 650px) {
             .header h1 {
                 font-size: 1.4rem;
@@ -284,6 +309,10 @@
             }
             .button-panel {
                 gap: 12px;
+            }
+            .card-front, .card-back {
+                padding: 20px 16px;
+                min-height: 140px;
             }
         }
 
@@ -318,13 +347,12 @@
 <div class="container">
     <div class="header">
         <h1>💗 101 причина, почему ты мне так дорога 💗</h1>
-        <p>Нажми на сердечко — открой причину.</p>
+        <p>Нажми на сердечко — открой причину. Нажми ещё раз — закрой</p>
         <div class="counter">
             Открыто: <span id="openedCount">0</span> / 101
         </div>
     </div>
 
-    <!-- Панель с двумя кнопками управления -->
     <div class="button-panel">
         <button class="control-btn" id="closeAllBtn">
             🔒 Закрыть все
@@ -347,13 +375,11 @@
 
 <audio id="bgMusic" loop preload="auto">
     <!-- ⚠️ ЗАМЕНИТЕ НАЗВАНИЕ ФАЙЛА НА ВАШУ ПЕСНЮ ⚠️ -->
-    <!-- Пример: <source src="101-prichina.mp3" type="audio/mpeg"> -->
-    <source src="101.mp3" type="audio/mpeg">
-    <!-- Если файл не найден, музыка не будет играть -->
+    <source src="song.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-    // ==================== 101 ПРИЧИНА (ДЛЯ НАЧАЛА ОТНОШЕНИЙ) ====================
+    // ==================== 101 ПРИЧИНА ====================
     const reasons = [
         "За твою улыбку — она делает мой день светлее ☀️",
         "За твой взгляд — в нём столько тепла 🌊",
@@ -437,7 +463,7 @@
         "За то, что ты всегда находишь нужные слова 📝",
         "За твою страсть к жизни 🔥",
         "За то, что ты веришь в лучшее в людях 🕊️",
-        "За то, что ты умеешь создавать уют даже на расстоянии 🏡",
+        "За то, как ты создаёшь уют даже на расстоянии 🏡",
         "За твои глаза, когда ты задумчива 🤔",
         "За то, что ты даришь мне новые эмоции 🎆",
         "За то, что ты умеешь быть разной — и это прекрасно 🦋",
@@ -446,7 +472,7 @@
         "За то, что ты ценишь моменты вместе 📸",
         "За твою способность вдохновлять окружающих ✨",
         "За то, что ты всегда остаёшься загадкой, которую хочется разгадывать 🔍",
-        "За твою улыбку, когда ты счастлива 🥹",
+        "За твою улыбку, когда ты счастлива 😊",
         "За то, что ты научила меня смотреть на мир иначе 🌍",
         "За то, что ты — это ты. Просто ты. И этого достаточно 💗",
         "За то, что каждый день с тобой — маленькое чудо 🌸",
@@ -458,13 +484,11 @@
         "За то, что 101 причина — это только начало 🌈"
     ];
 
-    // Ровно 101 причина
     const finalReasons = reasons.slice(0, 101);
     while(finalReasons.length < 101) {
         finalReasons.push("За то, что ты есть в моей жизни 💗");
     }
 
-    // Состояние открытых карточек
     let openedState = new Array(101).fill(false);
     
     const grid = document.getElementById('reasonsGrid');
@@ -472,10 +496,7 @@
     const closeAllBtn = document.getElementById('closeAllBtn');
     const openAllBtn = document.getElementById('openAllBtn');
     
-    // Музыка
     const bgMusic = document.getElementById('bgMusic');
-    
-    // 🔊 УСТАНОВКА ТИХОЙ ГРОМКОСТИ (0.25 — нежный романтический фон)
     bgMusic.volume = 0.25;
     
     const musicToggleBtn = document.getElementById('musicToggleBtn');
@@ -483,7 +504,7 @@
     let musicPlaying = false;
 
     function loadFromStorage() {
-        const saved = localStorage.getItem('reasonsOpened101_v3');
+        const saved = localStorage.getItem('reasonsOpened101_v4');
         if(saved) {
             try {
                 const arr = JSON.parse(saved);
@@ -496,7 +517,7 @@
     }
 
     function saveToStorage() {
-        localStorage.setItem('reasonsOpened101_v3', JSON.stringify(openedState));
+        localStorage.setItem('reasonsOpened101_v4', JSON.stringify(openedState));
     }
 
     function updateCounter() {
@@ -504,7 +525,6 @@
         openedCountSpan.innerText = count;
     }
 
-    // Обновление визуального состояния всех карточек
     function updateAllCardsVisual() {
         const cards = document.querySelectorAll('.reason-card');
         cards.forEach((card, idx) => {
@@ -516,7 +536,6 @@
         });
     }
 
-    // Закрыть все карточки
     function closeAllCards() {
         for(let i = 0; i < openedState.length; i++) {
             openedState[i] = false;
@@ -526,7 +545,6 @@
         updateAllCardsVisual();
     }
 
-    // Открыть все карточки
     function openAllCards() {
         for(let i = 0; i < openedState.length; i++) {
             openedState[i] = true;
@@ -535,7 +553,6 @@
         updateCounter();
         updateAllCardsVisual();
         
-        // Эффект: много сердечек при открытии всего
         for(let i = 0; i < 15; i++) {
             setTimeout(() => {
                 createRandomFloatingHeart();
@@ -562,7 +579,6 @@
         saveToStorage();
         updateCounter();
         
-        // Обновляем конкретную карточку
         const cards = document.querySelectorAll('.reason-card');
         if(cards[index]) {
             if(openedState[index]) {
@@ -582,6 +598,9 @@
             if(openedState[i]) card.classList.add('opened');
             card.setAttribute('data-index', i);
             
+            const cardInner = document.createElement('div');
+            cardInner.className = 'card-inner';
+            
             const frontDiv = document.createElement('div');
             frontDiv.className = 'card-front';
             frontDiv.innerHTML = `
@@ -595,15 +614,16 @@
             const backDiv = document.createElement('div');
             backDiv.className = 'card-back';
             backDiv.innerHTML = `
-                <div style="padding: 5px;">
+                <div class="card-back-content">
                     <div style="font-size: 1.6rem; margin-bottom: 12px;">💕</div>
                     <div style="font-weight: 500;">${finalReasons[i]}</div>
-                    <div style="font-size: 0.75rem; margin-top: 12px; opacity: 0.7;">✨ нажми, чтобы закрыть ✨</div>
+                    <div style="font-size: 0.7rem; margin-top: 12px; opacity: 0.6;">✨ нажми, чтобы закрыть ✨</div>
                 </div>
             `;
             
-            card.appendChild(frontDiv);
-            card.appendChild(backDiv);
+            cardInner.appendChild(frontDiv);
+            cardInner.appendChild(backDiv);
+            card.appendChild(cardInner);
             
             card.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -649,7 +669,6 @@
         }
     }
     
-    // Управление музыкой
     function toggleMusic() {
         if(musicPlaying) {
             bgMusic.pause();
@@ -657,7 +676,6 @@
             musicStatusSpan.innerText = 'Включить музыку';
         } else {
             bgMusic.play().catch(e => {
-                console.log("Автовоспроизведение заблокировано. Нажмите ещё раз.");
                 musicStatusSpan.innerText = 'Нажми ещё раз';
                 setTimeout(() => {
                     if(!musicPlaying) musicStatusSpan.innerText = 'Включить музыку';
@@ -669,7 +687,7 @@
     }
     
     bgMusic.addEventListener('error', () => {
-        console.log("Файл музыки не найден. Пожалуйста, проверьте имя файла song.mp3");
+        console.log("Файл музыки не найден");
     });
     
     musicToggleBtn.addEventListener('click', toggleMusic);
